@@ -75,13 +75,34 @@ h3 {
 
 .app-shell {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 12px;
   width: min(1180px, calc(100% - 28px));
   height: 100dvh;
   margin: 0 auto;
   padding: calc(16px + env(safe-area-inset-top)) 0
     calc(16px + env(safe-area-inset-bottom));
+  transition: background 180ms ease;
+}
+
+.app-shell.screen-default {
+  background: transparent;
+}
+
+.app-shell.screen-danger {
+  background: #ffe1dd;
+}
+
+.app-shell.screen-warning {
+  background: #fff0ad;
+}
+
+.app-shell.screen-calm {
+  background: #d8f7ed;
+}
+
+.app-shell.screen-blue {
+  background: #dff0ff;
 }
 
 main {
@@ -96,31 +117,46 @@ main {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 16px;
+  gap: 12px;
+  padding: 14px;
   border: 3px solid #111816;
   border-radius: 8px;
   background: #ffffff;
   box-shadow: 6px 6px 0 #111816;
 }
 
-.brand-row {
+.header-actions {
   display: flex;
-  min-width: 0;
   align-items: center;
-  gap: 12px;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
-.brand-mark {
+.top-icon-action {
   display: grid;
-  width: 52px;
-  height: 52px;
-  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
   place-items: center;
   border: 3px solid #111816;
   border-radius: 8px;
+  color: #111816;
+  background: #ffffff;
+  box-shadow: 3px 3px 0 #111816;
+}
+
+.top-icon-action.add {
+  color: #ffffff;
+  background: #00a878;
+}
+
+.top-icon-action.active {
   color: #ffffff;
   background: #006bff;
+}
+
+.top-icon-action:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #111816;
 }
 
 .eyebrow {
@@ -194,32 +230,6 @@ main {
 .complete-action:hover {
   transform: translate(-1px, -1px);
   box-shadow: 5px 5px 0 #111816;
-}
-
-.tab-bar {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  padding: 0;
-}
-
-.tab-bar button {
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: 3px solid #111816;
-  border-radius: 8px;
-  color: #111816;
-  background: #ffffff;
-  font-weight: 900;
-}
-
-.tab-bar button.active {
-  color: #ffffff;
-  background: #006bff;
-  box-shadow: 4px 4px 0 #111816;
 }
 
 .dashboard-grid {
@@ -783,11 +793,6 @@ textarea {
     box-shadow: 4px 4px 0 #111816;
   }
 
-  .brand-mark {
-    width: 46px;
-    height: 46px;
-  }
-
   h1 {
     font-size: 1.55rem;
   }
@@ -883,11 +888,6 @@ textarea {
 
   main {
     padding-bottom: 18px;
-  }
-
-  .tab-bar button {
-    min-height: 42px;
-    font-size: 0.92rem;
   }
 
   .stat-card {

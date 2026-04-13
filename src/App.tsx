@@ -230,37 +230,48 @@ function App() {
     setView("list");
   }
 
-  return (
-    <div className="app-shell">
-      <header className="app-header">
-        <div className="brand-row">
-          <div className="brand-mark">
-            <CalendarClock size={26} />
-          </div>
-          <div>
-            <p className="eyebrow">Planner ricorrente</p>
-            <h1>Pro Memoria</h1>
-          </div>
-        </div>
-        <button className="primary-action" onClick={() => setFormState({ mode: "create" })}>
-          <Plus size={18} />
-          Nuovo
-        </button>
-      </header>
+  function openAllReminders() {
+    setSearch("");
+    setStatusFilter("all");
+    setPriorityFilter("all");
+    setCategoryFilter("all");
+    setRangeFilter("all");
+    setView("list");
+  }
 
-      <nav className="tab-bar" aria-label="Navigazione principale">
-        <button
-          className={view === "dashboard" ? "active" : ""}
-          onClick={() => setView("dashboard")}
-        >
-          <Home size={17} />
-          Dashboard
-        </button>
-        <button className={view === "list" ? "active" : ""} onClick={() => setView("list")}>
-          <ListChecks size={17} />
-          Tutti i promemoria
-        </button>
-      </nav>
+  const screenTone = getScreenTone(view, statusFilter, rangeFilter);
+
+  return (
+    <div className={`app-shell ${screenTone}`}>
+      <header className="app-header">
+        <h1>Pro Memoria</h1>
+        <div className="header-actions" aria-label="Azioni principali">
+          <button
+            type="button"
+            className="top-icon-action add"
+            onClick={() => setFormState({ mode: "create" })}
+            aria-label="Nuovo promemoria"
+          >
+            <Plus size={21} />
+          </button>
+          <button
+            type="button"
+            className={`top-icon-action ${view === "dashboard" ? "active" : ""}`}
+            onClick={() => setView("dashboard")}
+            aria-label="Dashboard"
+          >
+            <Home size={20} />
+          </button>
+          <button
+            type="button"
+            className={`top-icon-action ${view === "list" ? "active" : ""}`}
+            onClick={openAllReminders}
+            aria-label="Tutti i promemoria"
+          >
+            <ListChecks size={20} />
+          </button>
+        </div>
+      </header>
 
       <main>
         {view === "dashboard" && (
@@ -1007,6 +1018,19 @@ function priorityWeight(priority: Priority): number {
     medium: 2,
     low: 1,
   }[priority];
+}
+
+function getScreenTone(
+  view: View,
+  statusFilter: StatusFilter,
+  rangeFilter: RangeFilter,
+): string {
+  if (view !== "list") return "screen-default";
+  if (rangeFilter === "next7") return "screen-calm";
+  if (statusFilter === "overdue") return "screen-danger";
+  if (statusFilter === "today") return "screen-warning";
+  if (statusFilter === "upcoming") return "screen-blue";
+  return "screen-default";
 }
 
 export default App;
