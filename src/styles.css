@@ -80,7 +80,8 @@ h3 {
   width: min(1180px, calc(100% - 28px));
   height: 100dvh;
   margin: 0 auto;
-  padding: 16px 0;
+  padding: calc(16px + env(safe-area-inset-top)) 0
+    calc(16px + env(safe-area-inset-bottom));
 }
 
 main {
@@ -253,7 +254,14 @@ main {
   align-items: center;
   gap: 14px;
   padding: 16px;
+  color: inherit;
+  text-align: left;
   background: #ffffff;
+}
+
+.stat-card:focus-visible {
+  outline: 4px solid rgba(0, 107, 255, 0.28);
+  outline-offset: 3px;
 }
 
 .stat-card.danger {
@@ -271,7 +279,9 @@ main {
 .stat-card span {
   display: block;
   color: #26322e;
+  font-size: 0.94rem;
   font-weight: 900;
+  line-height: 1.1;
 }
 
 .stat-card strong {
@@ -492,6 +502,31 @@ main {
   grid-template-columns: minmax(220px, 1fr) repeat(3, minmax(150px, 0.35fr));
   gap: 10px;
   margin-bottom: 16px;
+}
+
+.active-filter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  border: 3px solid #111816;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #111816;
+  background: #d8f7ed;
+  box-shadow: 4px 4px 0 #111816;
+  font-weight: 900;
+}
+
+.active-filter button {
+  flex: 0 0 auto;
+  border: 2px solid #111816;
+  border-radius: 8px;
+  padding: 7px 10px;
+  color: #ffffff;
+  background: #006bff;
+  font-weight: 900;
 }
 
 .search-field {
@@ -737,7 +772,10 @@ textarea {
 @media (max-width: 860px) {
   .app-shell {
     width: 100%;
-    padding: 10px;
+    padding: calc(10px + env(safe-area-inset-top))
+      calc(10px + env(safe-area-inset-right))
+      calc(10px + env(safe-area-inset-bottom))
+      calc(10px + env(safe-area-inset-left));
   }
 
   .app-header {
@@ -776,8 +814,11 @@ textarea {
   }
 
   .stat-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
     min-height: 92px;
-    padding: 12px;
+    gap: 8px;
+    padding: 10px;
   }
 
   .stat-icon {
@@ -787,6 +828,10 @@ textarea {
 
   .stat-card strong {
     font-size: 1.55rem;
+  }
+
+  .stat-card span {
+    font-size: 0.78rem;
   }
 
   .section-title {
@@ -843,6 +888,24 @@ textarea {
   .tab-bar button {
     min-height: 42px;
     font-size: 0.92rem;
+  }
+
+  .stat-card {
+    grid-template-columns: 1fr;
+    align-content: space-between;
+  }
+
+  .stat-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .active-filter {
+    display: grid;
+  }
+
+  .active-filter button {
+    width: 100%;
   }
 
   .panel {

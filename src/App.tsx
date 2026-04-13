@@ -74,6 +74,7 @@ type ReminderFormState = {
 
 type StatusFilter = "all" | ReminderStatus;
 type PriorityFilter = "all" | Priority;
+type RangeFilter = "all" | "next7";
 
 function App() {
   const [data, setData] = useState<AppData>(() => loadData());
@@ -84,6 +85,7 @@ function App() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [rangeFilter, setRangeFilter] = useState<RangeFilter>("all");
 
   useEffect(() => {
     saveData(data);
@@ -144,8 +146,16 @@ function App() {
       priorityFilter === "all" || reminder.priority === priorityFilter;
     const matchesCategory =
       categoryFilter === "all" || reminder.category === categoryFilter;
+    const matchesRange =
+      rangeFilter === "all" || isWithinNextDays(reminder.nextDueDate, 7, today);
 
-    return matchesSearch && matchesStatus && matchesPriority && matchesCategory;
+    return (
+      matchesSearch &&
+      matchesStatus &&
+      matchesPriority &&
+      matchesCategory &&
+      matchesRange
+    );
   });
 
   const selectedReminder =
@@ -159,6 +169,15 @@ function App() {
   function openDetail(reminderId: string) {
     setSelectedReminderId(reminderId);
     setView("detail");
+  }
+
+  function openQuickFilter(status: StatusFilter, range: RangeFilter = "all") {
+    setSearch("");
+    setStatusFilter(status);
+    setPriorityFilter("all");
+    setCategoryFilter("all");
+    setRangeFilter(range);
+    setView("list");
   }
 
   function handleSave(input: ReminderInput) {
@@ -254,6 +273,7 @@ function App() {
             onComplete={handleComplete}
             onOpenDetail={openDetail}
             onCreate={() => setFormState({ mode: "create" })}
+            onOpenQuickFilter={openQuickFilter}
           />
         )}
 
@@ -265,10 +285,15 @@ function App() {
             statusFilter={statusFilter}
             priorityFilter={priorityFilter}
             categoryFilter={categoryFilter}
+            rangeFilter={rangeFilter}
             onSearchChange={setSearch}
-            onStatusFilterChange={setStatusFilter}
+            onStatusFilterChange={(value) => {
+              setStatusFilter(value);
+              setRangeFilter("all");
+            }}
             onPriorityFilterChange={setPriorityFilter}
             onCategoryFilterChange={setCategoryFilter}
+            onClearRangeFilter={() => setRangeFilter("all")}
             onComplete={handleComplete}
             onOpenDetail={openDetail}
           />
@@ -309,6 +334,7 @@ function Dashboard({
   onComplete,
   onOpenDetail,
   onCreate,
+  onOpenQuickFilter,
 }: {
   overdue: Reminder[];
   dueToday: Reminder[];
@@ -318,19 +344,33 @@ function Dashboard({
   onComplete: (reminder: Reminder) => void;
   onOpenDetail: (id: string) => void;
   onCreate: () => void;
+  onOpenQuickFilter: (status: StatusFilter, range?: RangeFilter) => void;
 }) {
   const nextItems = upcoming.slice(0, 6);
 
   return (
     <section className="dashboard-grid">
       <div className="stats-grid">
-        <StatCard label="Arretrati" value={overdue.length} tone="danger" icon={<Clock3 />} />
-        <StatCard label="Oggi" value={dueToday.length} tone="warning" icon={<CalendarClock />} />
+        <StatCard
+          label="Arretrati"
+          value={overdue.length}
+          tone="danger"
+          icon={<Clock3 />}
+          onClick={() => onOpenQuickFilter("overdue")}
+        />
+        <StatCard
+          label="Oggi"
+          value={dueToday.length}
+          tone="warning"
+          icon={<CalendarClock />}
+          onClick={() => onOpenQuickFilter("today")}
+        />
         <StatCard
           label="Prossimi 7 giorni"
           value={nextSevenDaysCount}
           tone="calm"
           icon={<ListChecks />}
+          onClick={() => onOpenQuickFilter("all", "next7")}
         />
       </div>
 
@@ -415,10 +455,12 @@ function ReminderList({
   statusFilter,
   priorityFilter,
   categoryFilter,
+  rangeFilter,
   onSearchChange,
   onStatusFilterChange,
   onPriorityFilterChange,
   onCategoryFilterChange,
+  onClearRangeFilter,
   onComplete,
   onOpenDetail,
 }: {
@@ -428,10 +470,12 @@ function ReminderList({
   statusFilter: StatusFilter;
   priorityFilter: PriorityFilter;
   categoryFilter: string;
+  rangeFilter: RangeFilter;
   onSearchChange: (value: string) => void;
   onStatusFilterChange: (value: StatusFilter) => void;
   onPriorityFilterChange: (value: PriorityFilter) => void;
   onCategoryFilterChange: (value: string) => void;
+  onClearRangeFilter: () => void;
   onComplete: (reminder: Reminder) => void;
   onOpenDetail: (id: string) => void;
 }) {
@@ -487,6 +531,15 @@ function ReminderList({
           ))}
         </select>
       </div>
+
+      {rangeFilter === "next7" && (
+        <div className="active-filter">
+          <span>Filtro rapido: prossimi 7 giorni</span>
+          <button type="button" onClick={onClearRangeFilter}>
+            Mostra tutto
+          </button>
+        </div>
+      )}
 
       {reminders.length === 0 ? (
         <p className="muted-copy">Nessun promemoria corrisponde ai filtri attuali.</p>
@@ -851,20 +904,22 @@ function StatCard({
   value,
   tone,
   icon,
+  onClick,
 }: {
   label: string;
   value: number;
   tone: "danger" | "warning" | "calm";
   icon: ReactNode;
+  onClick: () => void;
 }) {
   return (
-    <article className={`stat-card ${tone}`}>
+    <button type="button" className={`stat-card ${tone}`} onClick={onClick}>
       <div className="stat-icon">{icon}</div>
       <div>
         <span>{label}</span>
         <strong>{value}</strong>
       </div>
-    </article>
+    </button>
   );
 }
 

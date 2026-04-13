@@ -1,0 +1,10 @@
+{
+  "name": "Pro Memoria",
+  "short_name": "Pro Memoria",
+  "description": "Promemoria ricorrenti personali con arretrati sempre visibili.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#eef4f1",
+  "theme_color": "#006bff"
+}
