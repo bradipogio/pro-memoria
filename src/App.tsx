@@ -1,13 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import {
+  AlertCircle,
   CalendarClock,
+  CalendarDays,
   Check,
   ChevronLeft,
   Clock3,
   Edit3,
+  History,
+  Home,
   ListChecks,
   Plus,
+  Repeat2,
   Search,
   Trash2,
 } from "lucide-react";
@@ -209,17 +214,18 @@ function App() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <div>
-          <p className="eyebrow">Promemoria personali</p>
-          <h1>Pro Memoria</h1>
-          <p className="header-copy">
-            Ricorrenze semplici, arretrati sempre visibili, prossime scadenze
-            sotto controllo.
-          </p>
+        <div className="brand-row">
+          <div className="brand-mark">
+            <CalendarClock size={26} />
+          </div>
+          <div>
+            <p className="eyebrow">Planner ricorrente</p>
+            <h1>Pro Memoria</h1>
+          </div>
         </div>
         <button className="primary-action" onClick={() => setFormState({ mode: "create" })}>
           <Plus size={18} />
-          Nuovo promemoria
+          Nuovo
         </button>
       </header>
 
@@ -228,9 +234,11 @@ function App() {
           className={view === "dashboard" ? "active" : ""}
           onClick={() => setView("dashboard")}
         >
+          <Home size={17} />
           Dashboard
         </button>
         <button className={view === "list" ? "active" : ""} onClick={() => setView("list")}>
+          <ListChecks size={17} />
           Tutti i promemoria
         </button>
       </nav>
@@ -327,11 +335,15 @@ function Dashboard({
       </div>
 
       <section className="panel urgent-panel">
-        <SectionTitle title="Da fare ora" subtitle="Arretrati e scadenze di oggi" />
+        <SectionTitle
+          icon={<AlertCircle size={22} />}
+          title="Ora"
+          subtitle="Arretrati e scadenze di oggi"
+        />
         {overdue.length === 0 && dueToday.length === 0 ? (
           <EmptyState
             title="Nessuna urgenza"
-            text="Qui appariranno promemoria scaduti e quelli da chiudere oggi."
+            text="Niente in coda."
             actionLabel="Aggiungi il primo"
             onAction={onCreate}
           />
@@ -351,7 +363,11 @@ function Dashboard({
       </section>
 
       <section className="panel">
-        <SectionTitle title="Prossimi promemoria" subtitle="In ordine di scadenza" />
+        <SectionTitle
+          icon={<CalendarDays size={22} />}
+          title="Prossimi"
+          subtitle="Ordinati per data"
+        />
         {nextItems.length === 0 ? (
           <EmptyState
             title="Nessun promemoria futuro"
@@ -374,18 +390,20 @@ function Dashboard({
         )}
       </section>
 
-      <section className="panel recent-panel">
-        <SectionTitle title="Completati di recente" subtitle="Ultime chiusure salvate" />
-        {recentCompletions.length === 0 ? (
-          <p className="muted-copy">La cronologia si popola quando completi un promemoria.</p>
-        ) : (
+      {recentCompletions.length > 0 && (
+        <section className="panel recent-panel">
+          <SectionTitle
+            icon={<History size={22} />}
+            title="Recenti"
+            subtitle="Ultime chiusure"
+          />
           <div className="history-list">
             {recentCompletions.map((completion) => (
               <HistoryItem key={completion.id} completion={completion} />
             ))}
           </div>
-        )}
-      </section>
+        </section>
+      )}
     </section>
   );
 }
@@ -420,8 +438,9 @@ function ReminderList({
   return (
     <section className="panel list-panel">
       <SectionTitle
+        icon={<ListChecks size={22} />}
         title="Tutti i promemoria"
-        subtitle="Ricerca, filtra e apri il dettaglio di ogni ricorrenza"
+        subtitle="Cerca, filtra, apri"
       />
 
       <div className="filters">
@@ -536,7 +555,11 @@ function ReminderDetail({
 
       <div className="detail-grid">
         <section className="panel">
-          <SectionTitle title="Dettagli" subtitle="Dati principali della ricorrenza" />
+          <SectionTitle
+            icon={<Repeat2 size={22} />}
+            title="Dettagli"
+            subtitle="Ricorrenza attiva"
+          />
           <dl className="meta-list">
             <div>
               <dt>Prossima scadenza</dt>
@@ -581,7 +604,11 @@ function ReminderDetail({
         </section>
 
         <section className="panel">
-          <SectionTitle title="Cronologia" subtitle="Occorrenze completate" />
+          <SectionTitle
+            icon={<History size={22} />}
+            title="Cronologia"
+            subtitle="Occorrenze completate"
+          />
           {completions.length === 0 ? (
             <p className="muted-copy">Nessun completamento registrato.</p>
           ) : (
@@ -612,6 +639,9 @@ function ReminderCard({
 
   return (
     <article className={`reminder-card ${status}`}>
+      <div className="card-status-icon" aria-hidden="true">
+        <StatusIcon status={status} />
+      </div>
       <button className="card-main" onClick={onOpen}>
         <div className="card-topline">
           <StatusBadge status={status} />
@@ -842,10 +872,27 @@ function StatusBadge({ status }: { status: ReminderStatus }) {
   return <span className={`status-badge ${status}`}>{statusLabels[status]}</span>;
 }
 
-function SectionTitle({ title, subtitle }: { title: string; subtitle: string }) {
+function StatusIcon({ status }: { status: ReminderStatus }) {
+  if (status === "overdue") return <AlertCircle size={24} />;
+  if (status === "today") return <CalendarDays size={24} />;
+  return <Clock3 size={24} />;
+}
+
+function SectionTitle({
+  icon,
+  title,
+  subtitle,
+}: {
+  icon: ReactNode;
+  title: string;
+  subtitle: string;
+}) {
   return (
     <div className="section-title">
-      <h2>{title}</h2>
+      <div className="section-heading">
+        <span>{icon}</span>
+        <h2>{title}</h2>
+      </div>
       <p>{subtitle}</p>
     </div>
   );
@@ -877,6 +924,9 @@ function EmptyState({
 function HistoryItem({ completion }: { completion: CompletionRecord }) {
   return (
     <article className="history-item">
+      <span className="history-icon">
+        <Check size={16} />
+      </span>
       <div>
         <h3>{completion.reminderTitle}</h3>
         <p>
